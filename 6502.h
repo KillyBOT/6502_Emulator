@@ -13,7 +13,7 @@
 #define POWER_RESET 0xfffc
 #define INTERRUPT_REQUEST_HANDLER 0xfffe
 
-//Opcodes
+//Opcodes, hopefully all this work pays off
 
 #define BRK_impl 0x00 //Break, implicit
 #define ORA_ind 0x01 //Or accumulator, indirect
@@ -45,6 +45,26 @@
 #define BIT_abs 0x2c //Bit test, absolute
 #define AND_abs 0x2d //And, absolute
 #define ROL_abs 0x2e //Rotate left, absolute
+
+#define BMI_rel 0x30 //Branch on minus, relative
+#define AND_indY 0x31 //And, indirectX
+#define AND_zpgX 0x35 //And, zeroPageX
+#define ROL_zpg 0x36 //Rotate left, zeroPage
+#define SEC_impl 0x38 //Set carry, implicit
+#define AND_absY 0x39 //And, absoluteY
+#define AND_absX 0x3d //And, absoluteX
+#define ROL_absX 0x3e //Rotate left, absoluteX
+
+#define RTI_impl 0x40 //Return from interrupt, implicit
+#define EOR_indX 0x41 //Exclusive or, indirectX
+#define EOR_zpg 0x45 //Exclusive or, zeroPage
+#define LSR_zpg 0x46 //Logical shift right, zeroPage
+#define PHA_impl 0x48 //Push accumulator onto stack, implicit
+#define EOR_im 0x49 //Exclusive or, immediate
+#define LSR_a 0x4a //Logical shift right, accumulator
+#define JMP_abs 0x4c//Jump, absolute
+#define EOR_abs 0x4d //Exclusive or, absolute
+#define LSR_abs 0x4e //Logical shift right, absolute
 
 typedef short address;
 typedef char reg;
