@@ -66,6 +66,101 @@
 #define EOR_abs 0x4d //Exclusive or, absolute
 #define LSR_abs 0x4e //Logical shift right, absolute
 
+#define BVC_rel 0x50 //Branch or overflow clear, relative
+#define EOR_intY 0x51 //Exclusive or, indirectY
+#define EOR_zpgX 0x55 //Exclusive or, zeroPageX
+#define LSR_zpgX 0x56 //Logical shift right, zeroPageX
+#define CLI_impl 0x58 //Clear interrupt disable, implicit
+#define EOR_absY 0x59 //Exclusive or, absoluteY
+#define EOR_absX 0x5d //Exclusive or, absoluteX
+#define LSR_absX 0x5e //Logical shift right, absoluteX
+
+#define RTS_impl 0x60 //return from subroutine, implicit
+#define ADC_indX 0x61 //Add with carry, indirectX
+#define ADC_zpg 0x65 //Add with carry, zeroPage
+#define ROR_zpg 0x66 //Rotate right, zeroPage
+#define PLA_impl 0x68 //Pull accumulator from stack, implicit
+#define ADC_im 0x69 //Add with carry, immediate
+#define ROR_a 0x6a //Right rotate, accumulator
+#define JMP_ind 0x6c //Jump, indirect
+#define ADC_abs 0x6d //Add with carry, absolute
+#define ROR_abs 0x6e //Rotate right, absolute
+
+#define BVS_rel 0x70 //Branch or overflow set, relative
+#define ADC_indY 0x71 //Add with carry, indirectY
+#define ADC_zpgX 0x75 //Add with carry, zeroPageX
+#define ROR_zpgX 0x76 //Rotate right, zeroPageX
+#define SEI_impl 0x78 //Set interrupt disable, implicit
+#define ADC_absY 0x79 //Add with carry, absoluteY
+#define ADC_absX 0x7d //Add with carry, absouluteX
+#define ROR_absX 0x7e //Rotate right, absouluteX
+
+#define STA_indX 0x81 //Store accumulator, indirectX
+#define STY_zpg 0x84 //Store Y, zeroPage
+#define STA_zpg 0x85 //Store accumulator, zeroPage
+#define STX_zpg 0x86 //Store X, zeroPage
+#define DEY_impl 0x88 //Decrement Y, implicit
+#define TXA_impl 0x8a //Transfer X to accumulator, implicit
+#define STY_abs 0x8c //Store Y, absolute
+#define STA_abs 0x8d //Store accumulator, absolute
+#define STX_abs 0x8e //Store X, absolute
+
+#define BCC_rel 0x90 //Branch on carry clear, relative
+#define STA_indY 0x91 //Store accumulator, indirectY
+#define STY_zpgY 0x94 //Store Y, zeroPageY
+#define STA_zpgX 0x95 //Store accumulator, zeroPageX
+#define STA_zpgY 0x96 //Store accumulator, zeroPageY
+#define TYA_impl 0x98 //Transfer Y to accumulator, implicit
+#define STA_absY 0x99 //Store accumulator, absoluteY
+#define TXS_impl 0x9a //Transfer X to stack pointer, implicit
+#define STA_absX 0x9d //Store accumulator, absoluteX
+
+#define LDY_im 0xa0 //Load Y, immediate
+#define LDA_indX 0xa1 //Load accumulator, indirectX
+#define LDX_im 0xa2 //Load X, immediate
+#define LDY_zpg 0xa4 //Load Y, zeroPage
+#define LDA_zpg 0xa5 //Load accumulator, zeroPage
+#define LDX_zpg 0xa6 //Load X, zeroPage
+#define TAY_impl 0xa8 //Transfer accumulator to Y, implicit
+#define LDA_im 0xa9 //Load accumulator, immediate
+#define TAX_impl 0xaa //Transfer accumulator to X, implicit
+#define LDY_abs 0xac //Load y, absolute
+#define LDA_abs 0xad //Load accumulator, absolute
+#define LDX_abs 0xae //Load X, absolute
+
+#define BCS_rel 0xb0 //Branch on clear, relative
+#define LDA_indY 0xb1 //Load accumulator, indirectY
+#define LDY_zpgX 0xb4 //Load Y, zeroPageX
+#define LDA_zpgX 0xb5 //Load accumulator, zeroPageX
+#define LDX_zpgY 0xb6 //Load X, zeroPgeY
+#define CLV_impl 0xb8 //Clear overflow, implicit
+#define LDA_absY 0xb9 //Load accumulator, absoluteY
+#define TSX_impl 0xba //Transfer stack pointer to X, implicit
+#define LDY_absX 0xbc //Load Y, absoulteX
+#define LDA_absX 0xbd //Load accumulator, absouluteX
+#define LDX_absY 0xbe //Load X, absoluteY
+
+#define CPY_im 0xc0 //Compare to Y, immediate
+#define CMP_indX 0xc1 //Compare to accumulator, indirectX
+#define CPY_zpg 0xc4 //Compare to Y, zeroPage
+#define CMP_zpg 0xc5 //Compare to accumulator, zeroPage
+#define DEC_zpg 0xc6 //Decrement, zeroPage
+#define INY_impl 0xc8 //Increment Y, implicit
+#define CMP_im 0xc9 //Compare to accumulator, immediate
+#define DEX_impl 0xca //Decrement X, implicit
+#define CPY_abs 0xcc //Compare to Y, absolute
+#define CMP_abs 0xcd //Compare to accumulator, absolute
+#define DEC_abs 0xce //Decrement, absolute
+
+#define BNE_rel 0xd0 //Branch on not equal, relative
+#define CMP_indY 0xd1 //Compare to accumulator, indirectY
+#define CMP_zpgX 0xd5 //Compare to accumulator, zeroPageX
+#define DEC_zpgX 0xd6 //Decrement, zeroPageX
+#define CLD_impl 0xd8 //Clear decimal, implicit
+#define CMP_absY 0xd9 //Compare to accumulator, absoluteY
+#define CMP_absX 0xdd //Compare to accumulator, absoluteX
+#define DEC_absX 0xde //Decrement, absoluteX
+
 typedef short address;
 typedef char reg;
 
