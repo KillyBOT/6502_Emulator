@@ -1,3 +1,10 @@
+/*
+Help from:
+
+https://www.masswerk.at/6502/6502_instruction_set.html#ORA
+http://www.obelisk.me.uk/6502/index.html
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,7 +23,7 @@
 //Opcodes, hopefully all this work pays off
 
 #define BRK_impl 0x00 //Break, implicit
-#define ORA_ind 0x01 //Or accumulator, indirect
+#define ORA_indX 0x01 //Or accumulator, indirect
 #define ORA_zpg 0x05 //Or accumulator, zeroPage
 #define ASL_zpg 0x06 //Arithmetic shift left, zeroPage
 #define PHP_impl 0x08 //Push processor status onto stack, implicit
@@ -26,7 +33,7 @@
 #define ASL_abs 0x0e //Arithmetic shift left, absolute
 
 #define BPL_rel 0x10 //Branch on plus, relative
-#define ORA_ind 0x11 //Or accumulator, zpgY
+#define ORA_indY 0x11 //Or accumulator, zpgY
 #define ORA_zpgX 0x15 //Or accumulator, zpgX
 #define ASL_zpgX 0x16 //Arithmetic shift left, zeroPageX
 #define CLC_impl 0x18 //Clear carry, implicit
@@ -49,7 +56,7 @@
 #define BMI_rel 0x30 //Branch on minus, relative
 #define AND_indY 0x31 //And, indirectX
 #define AND_zpgX 0x35 //And, zeroPageX
-#define ROL_zpg 0x36 //Rotate left, zeroPage
+#define ROL_zpgX 0x36 //Rotate left, zeroPage
 #define SEC_impl 0x38 //Set carry, implicit
 #define AND_absY 0x39 //And, absoluteY
 #define AND_absX 0x3d //And, absoluteX
@@ -161,30 +168,51 @@
 #define CMP_absX 0xdd //Compare to accumulator, absoluteX
 #define DEC_absX 0xde //Decrement, absoluteX
 
-typedef short address;
-typedef char reg;
+#define CPX_im 0xe0 //Compare to X, immediate
+#define SBC_indX 0xe1 //Subtract with carry, indirectX
+#define CPX_zpg 0xe4 //Compare to X, zeroPage
+#define SBC_zpg 0xe5 //Subtract with carry, zeroPage
+#define INC_zpg 0xe6 //Increment, zeroPage
+#define INX_impl 0xe8 //Increment X, implicit
+#define SBC_im 0xe9 //Subtract with carry, immediate
+#define NOP_impl 0xea //No operation, implicit
+#define CPX_abs 0xec //Compare with X, absolute
+#define SBC_abs 0xed //Subtract with carry, absolute
+#define INC_abs 0xee //Increment, absolute
+
+#define BEQ_rel 0xf0 //Branch if equal, relative
+#define SBC_indY 0xf1 //Subtract with carry, indirectY
+#define SBC_zpgX 0xf5 //Subtract with carry, zeroPageX
+#define INC_zpgX 0xf6 //Increment, zeroPageX
+#define SED_impl 0xf8 //Set decimal, implicit
+#define SBC_absY 0xf9 //Subtract with carry, absoluteY
+#define SBC_absX 0xfd //Subtract with carry, absoluteY
+#define INC_absX 0xfe //Increment, absoluteX
+
+typedef short reg_16;
+typedef char reg_8;
 
 //enum add_modes {implicit, accumulator, immediate, zeroPage, zeroPageX, zeroPageY, relative, absolute, absoluteX, absoluteY, indirect, indexedIndirect, indirectIndexed};
 
-
-
 typedef struct {
-  int cFlag : 1; //Carry flag
-  int zFlag : 1; //Zero flag
-  int intDisable : 1; //Interrupter disabler
-  int dMode : 1; //Decimal mode
-  int bCommand : 1; //Break command
-  int oFlag : 1; //Overflow flag
-  int nFlag : 1; //Negative flag
-} pStatus; //Processor status
-
-typedef struct {
-  address* mem; //Memory
-  address pCount; //Program counter
-  reg stPtr; //Stack pointer
-  reg acc; //Accumulator
-  reg rX; //Index register X
-  reg rY; //Index register Y
-  pStatus status; //Processor status
-  //reg status; //Processor status
+  reg_16* mem; //Memory
+  reg_16 pCount; //Program counter
+  reg_8 stPtr; //Stack pointer
+  reg_8 a; //Accumulator
+  reg_8 X; //Register X
+  reg_8 Y; //Register Y
+  reg_8 status; //Processor status
+  /*
+  Bit 7: Negative (N)
+  Bit 6: Overflow (V)
+  Bit 4: Break (B)
+  Bit 3: Decimal (D)
+  Bit 2: Interrupt (I)
+  Bit 1: Zero (Z)
+  Bit 0: Carry (C)
+  */
+  reg_8 stackPointer;
 } cycle;
+
+char* readInstruction(char* instruction, char* a, char* b);
+cycle doCycle(cycle currentStatus);
