@@ -214,5 +214,5 @@ typedef struct {
   reg_8 stackPointer;
 } cycle;
 
-char* readInstruction(char* instruction, char* a, char* b);
+int readInstruction(FILE* fp);
 cycle doCycle(cycle currentStatus);
