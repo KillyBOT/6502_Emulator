@@ -7,13 +7,14 @@ int main(int argc, char** argv){
   char* currentInstruction; // Current instruction
   int testEnd;
 
-  reg_16* mem = malloc(sizeof(reg_16) * (0x10000));
+  reg_16* mem = malloc(sizeof(reg_8) * (0x10000));
 
   if(argc > 1)p = fopen(argv[1],"r");
   else p = fopen("testProgram.txt","r");
 
   printf("File loaded!\n");
-  readInstruction(p);
+  readInstructions(p, 0x0800, mem);
+  memDump(mem, 0x0800, 2);
 
   printf("Finished\n");
 

@@ -195,9 +195,10 @@ typedef char reg_8;
 //enum add_modes {implicit, accumulator, immediate, zeroPage, zeroPageX, zeroPageY, relative, absolute, absoluteX, absoluteY, indirect, indexedIndirect, indirectIndexed};
 
 typedef struct {
-  reg_16* mem; //Memory
+  reg_8* mem; //Memory
   reg_16 pCount; //Program counter
   reg_8 stPtr; //Stack pointer
+  reg_8 stReg; //Status register
   reg_8 a; //Accumulator
   reg_8 X; //Register X
   reg_8 Y; //Register Y
@@ -214,5 +215,6 @@ typedef struct {
   reg_8 stackPointer;
 } cycle;
 
-int readInstruction(FILE* fp);
-cycle doCycle(cycle currentStatus);
+void readInstructions(FILE* fp, reg_16 programPointerStart, reg_16* mem);
+void memDump(reg_16* memory, reg_16 start, reg_16 size);
+int doCycle(cycle *currentCycle);
