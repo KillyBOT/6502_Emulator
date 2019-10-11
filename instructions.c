@@ -1,18 +1,37 @@
 #include "6502.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-void readInstructions(FILE* fp, reg_16 programPointerStart, reg_16* mem){
+struct cycle* initCycle(){
+  struct cycle* c = malloc(sizeof(struct cycle));
+  c->mem = malloc(sizeof(reg_8) * (0x10000));
+  c->pCount = 0x800;
+  c->stPtr = 0x00;
+  c->stReg = 0x00;
+  c->a = 0x00;
+  c->x = 0x00;
+  c->y = 0x00;
+  c->status = 0x00;
+
+  return c;
+}
+
+void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem){
   char* buffer = malloc(sizeof(char));
   reg_16 currentPlace = programPointerStart;
-  while(fread(buffer, sizeof(char), 1, fp) > 0){
+  size_t readSize = 1;
+  while(readSize > 0){
+    *buffer = 0x00;
+    readSize = fread(buffer, sizeof(char), 1, fp);
     *(mem + currentPlace) = *buffer;
     currentPlace++;
+    printf("%.2X\n", *buffer);
   }
 
   printf("Program loaded!\n");
 }
 
-void memDump(reg_16* mem, reg_16 start, reg_16 size){
+void memDump(reg_8* mem, reg_16 start, reg_16 size){
   for(reg_16 x = 0; x < size * 8; x+=8){
     printf("%x: ", start + x);
     for(int y = 0; y < 8; y++){
@@ -22,7 +41,7 @@ void memDump(reg_16* mem, reg_16 start, reg_16 size){
   }
 }
 
-void printCycle(cycle* c){
-  printf("PC   AC  X  Y  SR SP NV-BDIZC\n");
-  printf("%.4X %.2X %.2x %.2X %.2X %.2X %.2X\n", c->pCount, c->a, c->X, c->Y, c->stReg, c->stPtr, c->status);
+void printCycle(struct cycle* c){
+  printf("PC   A  X  Y  SR SP NV-BDIZC\n");
+  printf("%.4X %.2X %.2x %.2X %.2X %.2X %.2X\n", c->pCount, c->a, c->x, c->y, c->stReg, c->stPtr, c->status);
 }

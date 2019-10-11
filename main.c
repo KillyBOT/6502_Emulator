@@ -6,15 +6,17 @@ int main(int argc, char** argv){
   int pS;
   char* currentInstruction; // Current instruction
   int testEnd;
+  struct cycle *c;
 
-  reg_16* mem = malloc(sizeof(reg_8) * (0x10000));
+  c = initCycle();
 
   if(argc > 1)p = fopen(argv[1],"r");
-  else p = fopen("testProgram.txt","r");
+  else p = fopen("testProgram.o","r");
 
   printf("File loaded!\n");
-  readInstructions(p, 0x0800, mem);
-  memDump(mem, 0x0800, 2);
+  readInstructions(p, 0x0800, c->mem);
+  memDump(c->mem, 0x0800, 2);
+  printCycle(c);
 
   printf("Finished\n");
 

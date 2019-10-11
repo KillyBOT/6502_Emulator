@@ -3,6 +3,8 @@ Help from:
 
 https://www.masswerk.at/6502/6502_instruction_set.html#ORA
 http://www.obelisk.me.uk/6502/index.html
+http://www.6502.org
+https://web.archive.org/web/20150520143433/https://www.esw-heim.tu-clausthal.de/~marco/smorbrod/acme/
 */
 
 #include <stdio.h>
@@ -194,14 +196,14 @@ typedef char reg_8;
 
 //enum add_modes {implicit, accumulator, immediate, zeroPage, zeroPageX, zeroPageY, relative, absolute, absoluteX, absoluteY, indirect, indexedIndirect, indirectIndexed};
 
-typedef struct {
+struct cycle{
   reg_8* mem; //Memory
   reg_16 pCount; //Program counter
   reg_8 stPtr; //Stack pointer
   reg_8 stReg; //Status register
   reg_8 a; //Accumulator
-  reg_8 X; //Register X
-  reg_8 Y; //Register Y
+  reg_8 x; //Register X
+  reg_8 y; //Register Y
   reg_8 status; //Processor status
   /*
   Bit 7: Negative (N)
@@ -212,9 +214,10 @@ typedef struct {
   Bit 1: Zero (Z)
   Bit 0: Carry (C)
   */
-  reg_8 stackPointer;
-} cycle;
+};
 
-void readInstructions(FILE* fp, reg_16 programPointerStart, reg_16* mem);
-void memDump(reg_16* memory, reg_16 start, reg_16 size);
-int doCycle(cycle *currentCycle);
+void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem);
+void memDump(reg_8* memory, reg_16 start, reg_16 size);
+struct cycle* initCycle();
+void printCycle(struct cycle* c);
+int doCycle(struct cycle *currentCycle);

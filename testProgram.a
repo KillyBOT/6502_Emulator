@@ -1,0 +1,11 @@
+!to "testProgram.o", cbm
+*= $0800
+
+
+
+lda #01
+sta $00
+lda #02
+adc $00
+sta $00
+.END
