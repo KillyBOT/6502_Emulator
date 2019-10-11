@@ -17,12 +17,9 @@ struct cycle* initCycle(){
 }
 
 void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem){
-  char* buffer = malloc(sizeof(char));
+  reg_8* buffer = malloc(sizeof(reg_8));
   reg_16 currentPlace = programPointerStart;
-  size_t readSize = 1;
-  while(readSize > 0){
-    *buffer = 0x00;
-    readSize = fread(buffer, sizeof(char), 1, fp);
+  while(fread(buffer, sizeof(reg_8), 1, fp) > 0){
     *(mem + currentPlace) = *buffer;
     currentPlace++;
     printf("%.2X\n", *buffer);
@@ -33,7 +30,7 @@ void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem){
 
 void memDump(reg_8* mem, reg_16 start, reg_16 size){
   for(reg_16 x = 0; x < size * 8; x+=8){
-    printf("%x: ", start + x);
+    printf("%X: ", start + x);
     for(int y = 0; y < 8; y++){
       printf("%.2X ", *(mem + y + start + x));
     }
@@ -44,4 +41,8 @@ void memDump(reg_8* mem, reg_16 start, reg_16 size){
 void printCycle(struct cycle* c){
   printf("PC   A  X  Y  SR SP NV-BDIZC\n");
   printf("%.4X %.2X %.2x %.2X %.2X %.2X %.2X\n", c->pCount, c->a, c->x, c->y, c->stReg, c->stPtr, c->status);
+}
+
+int doCycle(struct cycle* c){
+  
 }

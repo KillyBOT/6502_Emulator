@@ -191,8 +191,8 @@ https://web.archive.org/web/20150520143433/https://www.esw-heim.tu-clausthal.de/
 #define SBC_absX 0xfd //Subtract with carry, absoluteY
 #define INC_absX 0xfe //Increment, absoluteX
 
-typedef short reg_16;
-typedef char reg_8;
+typedef unsigned short reg_16;
+typedef unsigned char reg_8;
 
 //enum add_modes {implicit, accumulator, immediate, zeroPage, zeroPageX, zeroPageY, relative, absolute, absoluteX, absoluteY, indirect, indexedIndirect, indirectIndexed};
 
