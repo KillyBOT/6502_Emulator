@@ -51,6 +51,14 @@ int doCycle(struct cycle* c){
   reg_8 currentInstruction;
   reg_8 zPAddress;
   reg_8 absoluteAddress;
+
+  currentInstruction = *(c->mem) + c->pCount;
+
+  switch(currentInstruction){
+    default:
+      printf("ERROR! You shouldn\'t be seeing this.\n");
+      c->status = 16;
+  }
 }
 
 reg_16 getFlipped(struct cycle* c){
