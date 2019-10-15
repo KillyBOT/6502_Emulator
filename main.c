@@ -4,7 +4,9 @@ int main(int argc, char** argv){
 
   FILE* p;
   int pS;
-  char* currentInstruction; // Current instruction
+  reg_16 programPointerStart;
+  reg_8* programPointerStart1 = malloc(sizeof(reg_8));
+  reg_8* programPointerStart2 = malloc(sizeof(reg_8));//First 2, then 1. 6502 is little endian
   int testEnd;
   struct cycle *c;
 
@@ -13,9 +15,24 @@ int main(int argc, char** argv){
   if(argc > 1)p = fopen(argv[1],"r");
   else p = fopen("testProgram.o","r");
 
+  //Get the program pointer start
+
+  programPointerStart = 0;
+  fread(programPointerStart2, sizeof(reg_8), 1, p);
+  fread(programPointerStart1, sizeof(reg_8), 1, p);
+  programPointerStart = *programPointerStart1;
+  programPointerStart <<= 8;
+  programPointerStart ^= *programPointerStart2;
+
+  printf("Pointer Start: %.4X\n", programPointerStart);
+
+  c->pCount = programPointerStart;
+
+  //Read the rest of the instructions
+  readInstructions(p, programPointerStart, c->mem);
+
   printf("File loaded!\n");
-  readInstructions(p, 0x0800, c->mem);
-  memDump(c->mem, 0x0800, 2);
+  memDump(c->mem, programPointerStart, 2);
   printCycle(c);
 
   printf("Finished\n");

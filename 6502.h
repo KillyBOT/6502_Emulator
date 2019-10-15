@@ -221,3 +221,4 @@ void memDump(reg_8* memory, reg_16 start, reg_16 size);
 struct cycle* initCycle();
 void printCycle(struct cycle* c);
 int doCycle(struct cycle *currentCycle);
+reg_16 getFlipped(struct cycle* c);

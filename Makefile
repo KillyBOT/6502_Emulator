@@ -6,3 +6,6 @@ main.o: main.c 6502.h
 
 instructions.o: instructions.c 6502.h
 	gcc -c instructions.c
+
+clean:
+	rm *.o
