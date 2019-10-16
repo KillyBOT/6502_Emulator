@@ -5,6 +5,7 @@ https://www.masswerk.at/6502/6502_instruction_set.html#ORA
 http://www.obelisk.me.uk/6502/index.html
 http://www.6502.org
 https://web.archive.org/web/20150520143433/https://www.esw-heim.tu-clausthal.de/~marco/smorbrod/acme/
+https://fms.komkon.org/EMUL8/NES.html#LABC
 */
 
 #include <stdio.h>
@@ -221,4 +222,4 @@ void memDump(reg_8* memory, reg_16 start, reg_16 size);
 struct cycle* initCycle();
 void printCycle(struct cycle* c);
 int doCycle(struct cycle *currentCycle);
-reg_16 getFlipped(struct cycle* c);
+reg_16 getFlipped(struct cycle* c, reg_8 pos1, reg_8 pos2);

@@ -52,21 +52,32 @@ int doCycle(struct cycle* c){
   reg_8 zPAddress;
   reg_8 absoluteAddress;
 
-  currentInstruction = *(c->mem) + c->pCount;
+  reg_8 toAdd = 2;
+
+  currentInstruction = *(c->mem + c->pCount);
+
 
   switch(currentInstruction){
+    case LDA_im:
+      printf("LDA_im\n");
+      c->a = *(c->mem + c->pCount + 1);
     default:
       printf("ERROR! You shouldn\'t be seeing this.\n");
-      c->status = 16;
+      c->status ^= 16;
+      return 0;
   }
+
+  c->pCount += toAdd;
+
+  return 1;
 }
 
-reg_16 getFlipped(struct cycle* c){
+reg_16 getFlipped(struct cycle* c, reg_8 pos1, reg_8 pos2){
   reg_16 final = 0;
   reg_8 p1, p2;
 
-  p1 = *(c->mem + 1);
-  p2 = *(c->mem + 2);
+  p1 = *(c->mem + pos1);
+  p2 = *(c->mem + pos2);
   final = p2;
   final <<= 8;
   final ^= p1;
