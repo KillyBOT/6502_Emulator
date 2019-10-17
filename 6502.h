@@ -223,3 +223,7 @@ struct cycle* initCycle();
 void printCycle(struct cycle* c);
 int doCycle(struct cycle *currentCycle);
 reg_16 getFlipped(struct cycle* c, reg_8 pos1, reg_8 pos2);
+reg_8* getZPG(reg_8* mem, reg_8 a);
+reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o);
+reg_8* getAbs(reg_8* mem, reg_16 a);
+reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);

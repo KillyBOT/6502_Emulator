@@ -39,6 +39,13 @@ int main(int argc, char** argv){
   memDump(c->mem, programPointerStart, 2);
   printCycle(c);
 
+  printf("Starting program\n");
+
+  while(doCycle(c) == 1) {
+    printCycle(c);
+    printf("\n");
+  }
+
   printf("Finished\n");
 
   //fseek(program, 0, SEEK_END);
