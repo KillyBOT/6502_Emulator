@@ -2,25 +2,25 @@
 
 int main(int argc, char** argv){
 
-  FILE* p;
+  FILE* pgm;
   int pS;
   reg_16 programPointerStart;
   reg_8* programPointerStart1 = malloc(sizeof(reg_8));
   reg_8* programPointerStart2 = malloc(sizeof(reg_8));//First 2, then 1. 6502 is little endian
   int testEnd;
   int steps;
-  struct cycle *c;
+  struct processor *p;
 
-  c = initCycle();
+  p = initProcessor();
 
-  if(argc > 1)p = fopen(argv[1],"r");
-  else p = fopen("testProgram.o","r");
+  if(argc > 1)pgm = fopen(argv[1],"r");
+  else pgm = fopen("testProgram.o","r");
 
   //Get the program pointer start
 
   programPointerStart = 0;
-  fread(programPointerStart2, sizeof(reg_8), 1, p);
-  fread(programPointerStart1, sizeof(reg_8), 1, p);
+  fread(programPointerStart2, sizeof(reg_8), 1, pgm);
+  fread(programPointerStart1, sizeof(reg_8), 1, pgm);
   programPointerStart = *programPointerStart1;
   programPointerStart <<= 8;
   programPointerStart ^= *programPointerStart2;
@@ -30,21 +30,21 @@ int main(int argc, char** argv){
 
   printf("Pointer Start: %.4X\n", programPointerStart);
 
-  c->pCount = programPointerStart;
+  p->pCount = programPointerStart;
 
   //Read the rest of the instructions
-  readInstructions(p, programPointerStart, c->mem);
+  readInstructions(pgm, programPointerStart, p->mem);
 
   printf("File loaded!\n");
-  memDump(c->mem, programPointerStart, 2);
-  printCycle(c);
+  memDump(p->mem, programPointerStart, 2);
+  printProcessor(p);
 
   printf("Starting program\n");
 
-  while(doCycle(c) == 1) {
-    printCycle(c);
+  /*while(doCycle(c) == 1) {
+    printProcessor(c);
     printf("\n");
-  }
+  }*/
 
   printf("Finished\n");
 
@@ -55,7 +55,7 @@ int main(int argc, char** argv){
   //printf("%d\n", programSize);
 
 
-  fclose(p);
-  free(c->mem);
-  free(c);
+  fclose(pgm);
+  free(p->mem);
+  free(p);
 }

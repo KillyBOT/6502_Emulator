@@ -23,6 +23,26 @@ https://fms.komkon.org/EMUL8/NES.html#LABC
 #define POWER_RESET 0xfffc
 #define INTERRUPT_REQUEST_HANDLER 0xfffe
 
+//Flags for the processor status
+
+/*
+Bit 7: Negative (N)
+Bit 6: Overflow (V)
+Bit 4: Break (B)
+Bit 3: Decimal (D)
+Bit 2: Interrupt (I)
+Bit 1: Zero (Z)
+Bit 0: Carry (C)
+*/
+
+#define N 128 //Negative
+#define V 64 //Overflow
+#define B 16 //Break
+#define D 8 //Decimal
+#define I 4 //Interrupt
+#define Z 2 //Zero
+#define C 1 //Carry
+
 //Opcodes, hopefully all this work pays off
 
 #define BRK_impl 0x00 //Break, implicit
@@ -195,9 +215,9 @@ https://fms.komkon.org/EMUL8/NES.html#LABC
 typedef unsigned short reg_16;
 typedef unsigned char reg_8;
 
-//enum add_modes {implicit, accumulator, immediate, zeroPage, zeroPageX, zeroPageY, relative, absolute, absoluteX, absoluteY, indirect, indexedIndirect, indirectIndexed};
+enum addr_mode {none, impl, a, im, zpg, zpgX, zpgY, rel, absN, absX, absY, ind, indX, indY};
 
-struct cycle{
+struct processor{
   reg_8* mem; //Memory
   reg_16 pCount; //Program counter
   reg_8 stPtr; //Stack pointer
@@ -206,24 +226,24 @@ struct cycle{
   reg_8 x; //Register X
   reg_8 y; //Register Y
   reg_8 status; //Processor status
-  /*
-  Bit 7: Negative (N)
-  Bit 6: Overflow (V)
-  Bit 4: Break (B)
-  Bit 3: Decimal (D)
-  Bit 2: Interrupt (I)
-  Bit 1: Zero (Z)
-  Bit 0: Carry (C)
-  */
+  long cycles; //Number of cycles. This isn't part of the original architecture, of course.
 };
+
+/*struct cycle{
+  struct processor p;
+  reg_8 currentRead;
+  addr_mode currentAddressMode;
+  reg_8
+};*/
 
 void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem);
 void memDump(reg_8* memory, reg_16 start, reg_16 size);
-struct cycle* initCycle();
-void printCycle(struct cycle* c);
-int doCycle(struct cycle *currentCycle);
-reg_16 getFlipped(struct cycle* c, reg_8 pos1, reg_8 pos2);
-reg_8* getZPG(reg_8* mem, reg_8 a);
-reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o);
-reg_8* getAbs(reg_8* mem, reg_16 a);
-reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);
+struct processor* initProcessor();
+void printProcessor(struct processor* p);
+int doCycle(struct processor *currentProcessor, addr_mode a);
+
+reg_16 getFlipped(struct processor* p, reg_8 pos1, reg_8 pos2);
+reg_8* getZPG(struct processor *p, reg_8 a);
+reg_8* getZPGOffset(struct processor *p, reg_8 a, reg_8 o);
+reg_8* getAbs(struct processor *p, reg_16 a);
+reg_8* getAbsOffset(struct processor *p, reg_16 a, reg_8 o);
