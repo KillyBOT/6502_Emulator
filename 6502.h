@@ -215,7 +215,26 @@ Bit 0: Carry (C)
 typedef unsigned short reg_16;
 typedef unsigned char reg_8;
 
-enum addr_mode {none, impl, a, im, zpg, zpgX, zpgY, rel, absN, absX, absY, ind, indX, indY};
+enum addr_mode {none,
+  impl, //implicit
+  a, //Absolute
+  im, //Immediate
+  zpg, //Zero page
+  zpgX1, //Zero Page X stage 1: add X
+  zpgX2, //Zero Page X stage 2: find variable
+  zpgY,
+  rel,
+  absN1,
+  absN2,
+  absX1,
+  absX2,
+  absY1,
+  absY2,
+  ind,
+  indX1,
+  indX2,
+  indY1,
+  indY2};
 
 struct processor{
   reg_8* mem; //Memory
@@ -225,25 +244,26 @@ struct processor{
   reg_8 a; //Accumulator
   reg_8 x; //Register X
   reg_8 y; //Register Y
+  reg_8 read_8; //8 bit read
+  reg_16 read_16; //16 bit read
   reg_8 status; //Processor status
   long cycles; //Number of cycles. This isn't part of the original architecture, of course.
+  enum addr_mode aMode; //Current addressing mode
 };
 
-/*struct cycle{
+struct cycle{
   struct processor p;
-  reg_8 currentRead;
-  addr_mode currentAddressMode;
-  reg_8
-};*/
+  enum addr_mode currentAddressMode;
+};
 
 void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem);
 void memDump(reg_8* memory, reg_16 start, reg_16 size);
 struct processor* initProcessor();
 void printProcessor(struct processor* p);
-int doCycle(struct processor *currentProcessor, addr_mode a);
+int doCycle(struct processor *currentProcessor);
 
-reg_16 getFlipped(struct processor* p, reg_8 pos1, reg_8 pos2);
-reg_8* getZPG(struct processor *p, reg_8 a);
-reg_8* getZPGOffset(struct processor *p, reg_8 a, reg_8 o);
-reg_8* getAbs(struct processor *p, reg_16 a);
-reg_8* getAbsOffset(struct processor *p, reg_16 a, reg_8 o);
+reg_16 getFlipped(reg_8* mem, reg_8 pos1, reg_8 pos2);
+reg_8* getZPG(reg_8* mem, reg_8 a);
+reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o);
+reg_8* getAbs(reg_8* mem, reg_16 a);
+reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);

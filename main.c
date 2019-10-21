@@ -41,10 +41,7 @@ int main(int argc, char** argv){
 
   printf("Starting program\n");
 
-  /*while(doCycle(c) == 1) {
-    printProcessor(c);
-    printf("\n");
-  }*/
+  while (doCycle(p));
 
   printf("Finished\n");
 

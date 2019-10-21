@@ -4,16 +4,18 @@
 
 struct processor* initProcessor(){
   struct processor* p = malloc(sizeof(struct processor));
-  c->mem = malloc(sizeof(reg_8) * (0x10000));
-  c->pCount = 0x800;
-  c->stPtr = 0x00;
-  c->stReg = 0x00;
-  c->a = 0x00;
-  c->x = 0x00;
-  c->y = 0x00;
-  c->status = 0x00;
+  p->mem = malloc(sizeof(reg_8) * (0x10000));
+  p->pCount = 0x800;
+  p->stPtr = 0x00;
+  p->stReg = 0x00;
+  p->a = 0x00;
+  p->x = 0x00;
+  p->y = 0x00;
+  p->status = 0x00;
+  p->cycles = 0;
+  p->aMode = none;
 
-  return c;
+  return p;
 }
 
 void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem){
@@ -41,9 +43,9 @@ void memDump(reg_8* mem, reg_16 start, reg_16 size){
 
 void printProcessor(struct processor* p){
   printf("PC   A  X  Y  SR SP NV-BDIZC\n");
-  printf("%.4X %.2X %.2x %.2X %.2X %.2X ", c->pCount, c->a, c->x, c->y, c->stReg, c->stPtr);
+  printf("%.4X %.2X %.2x %.2X %.2X %.2X ", p->pCount, p->a, p->x, p->y, p->stReg, p->stPtr);
 
-  for(int x = 7; x >= 0; x--) printf("%.1X", (c->status >> x) & 1);
+  for(int x = 7; x >= 0; x--) printf("%.1X", (p->status >> x) & 1);
   printf("\n");
 }
 
@@ -99,17 +101,58 @@ void printProcessor(struct processor* p){
 }*/
 int doCycle(struct processor* p){
 
+  printf("Cycle [%ld]\n", p->cycles);
+  printProcessor(p);
+
+  //Look at flags
+  if((p->status & I) == I){
+    printf("Interrupt flag\n");
+    return 0;
+  }
+
+  reg_8 read = *(p->mem + p->pCount);
+  enum addr_mode aMode = p->aMode;
+
   p->pCount++;
   p->cycles++;
+
+  //Look at current address mode
+  if(aMode == none){ //Time to read the next instruction
+
+      switch(read){
+        case BRK_impl:
+          printf("BRK_impl\n");
+          p->status |= I;
+          break;
+        default:
+          printf("Invalid argument\n");
+          p->status |= I;
+          break;
+      }
+
+  } else {
+
+    p->aMode = none;
+
+    if(aMode == impl){
+      p->read_8 = read;
+    }
+
+    else {
+      printf("Unaccounted addressing mode! Ending process.\n");
+      return 0;
+    }
+
+  }
   return 1;
 }
 
-reg_16 getFlipped(struct processor* p, reg_8 pos1, reg_8 pos2){
+reg_16 getFlipped(reg_8* mem, reg_8 pos1, reg_8 pos2){
   reg_16 final = 0;
   reg_8 p1, p2;
 
-  p1 = *(c->mem + pos1);
-  p2 = *(c->mem + pos2);
+  p1 = *(mem + pos1);
+  p2 = *(mem + pos2);
   final = p2;
   final <<= 8;
   final ^= p1;
