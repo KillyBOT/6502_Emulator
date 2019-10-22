@@ -248,7 +248,6 @@ struct processor{
   reg_16 read_16; //16 bit read
   reg_8 status; //Processor status
   long cycles; //Number of cycles. This isn't part of the original architecture, of course.
-  enum addr_mode aMode; //Current addressing mode
 };
 
 struct cycle{

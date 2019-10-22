@@ -13,7 +13,6 @@ struct processor* initProcessor(){
   p->y = 0x00;
   p->status = 0x00;
   p->cycles = 0;
-  p->aMode = none;
 
   return p;
 }
@@ -47,103 +46,76 @@ void printProcessor(struct processor* p){
 
   for(int x = 7; x >= 0; x--) printf("%.1X", (p->status >> x) & 1);
   printf("\n");
+  printf("Cycles: %ld\n", p->cycles);
 }
 
-/*int doCycle(struct processor* p){
+int doCycle(struct processor* p){
 
-  if((c->status & 4) == 4){
-    printf("Program interrupted\n");
+  printProcessor(p);
+
+  //Check flags
+
+  if((p->status & 4) == 4){
+    printf("Program inEterrupted\n");
     return 0;
   }
 
   reg_8 currentInstruction;
   reg_8 zPAddress; // Also can be the immediate too!
   reg_16 absAddress;
-
-  reg_8 toAdd = 2;
-
-  currentInstruction = *(c->mem + c->pCount);
-  zPAddress = *(c->mem + c->pCount + 1);
-  absAddress = getFlipped(c, 1, 2);
+  reg_8 toAdd;
   reg_16 sumTest;
-  //printf("%.2X %.2X %.2X\n", currentInstruction, zPAddress, absAddress);
+  long cyclesToAdd;
+
+  currentInstruction = *(p->mem + p->pCount);
+  zPAddress = *(p->mem + p->pCount + 1);
+  absAddress = getFlipped(p->mem, 1, 2);
+  toAdd = 2;
+  cyclesToAdd = 2;
 
   switch(currentInstruction){
     case BRK_impl:
       printf("BRK_impl\n");
-      c->status |= I;
+
+      p->status |= I;
+
       break;
     case LDA_im:
       printf("LDA_im\n");
-      c->a = zPAddress;
+
+      p->a = zPAddress;
+      
       break;
     case STA_zpg:
       printf("STA_zpg\n");
-      *getZPG(c->mem, zPAddress) = c->a;
-      memDump(c->mem, zPAddress, 2);
-      printf("\n");
+
+      *getZPG(p->mem, zPAddress) = p->a;
+
+      cyclesToAdd = 3;
+
       break;
     case ADC_zpg:
       printf("ADC_zpg\n");
-      sumTest = c->a + *getZPG(c->mem, zPAddress);
-      c->a += *getZPG(c->mem, zPAddress);
-      if(sumTest > 0xFF) c->status |= C;
+
+      sumTest = p->a + *getZPG(p->mem, zPAddress);
+      p->a += *getZPG(p->mem, zPAddress);
+
+      cyclesToAdd = 3;
+
+      if(sumTest > 0xFF) {
+        p->status |= C;
+      }
+
       break;
     default:
       printf("ERROR! You shouldn\'t be seeing this.\n");
-      c->status |= I;
+      p->status |= I;
       break;
   }
 
-  c->pCount += toAdd;
+  p->pCount += toAdd;
+  p->cycles += cyclesToAdd;
 
-  return 1;
-}*/
-int doCycle(struct processor* p){
-
-  printf("Cycle [%ld]\n", p->cycles);
-  printProcessor(p);
-
-  //Look at flags
-  if((p->status & I) == I){
-    printf("Interrupt flag\n");
-    return 0;
-  }
-
-  reg_8 read = *(p->mem + p->pCount);
-  enum addr_mode aMode = p->aMode;
-
-  p->pCount++;
-  p->cycles++;
-
-  //Look at current address mode
-  if(aMode == none){ //Time to read the next instruction
-
-      switch(read){
-        case BRK_impl:
-          printf("BRK_impl\n");
-          p->status |= I;
-          break;
-        default:
-          printf("Invalid argument\n");
-          p->status |= I;
-          break;
-      }
-
-  } else {
-
-    p->aMode = none;
-
-    if(aMode == impl){
-      p->read_8 = read;
-    }
-
-    else {
-      printf("Unaccounted addressing mode! Ending process.\n");
-      return 0;
-    }
-
-  }
   return 1;
 }
 
