@@ -4,7 +4,7 @@
 
 struct processor* initProcessor(){
   struct processor* p = malloc(sizeof(struct processor));
-  p->mem = malloc(sizeof(reg_8) * (0x10000));
+  p->mem = calloc(sizeof(reg_8), 0x10000);
   p->pCount = 0x800;
   p->stPtr = 0x00;
   p->stReg = 0x00;
@@ -52,11 +52,12 @@ void printProcessor(struct processor* p){
 int doCycle(struct processor* p){
 
   printProcessor(p);
+  printf("\n");
 
   //Check flags
 
   if((p->status & 4) == 4){
-    printf("Program inEterrupted\n");
+    printf("Program interrupted\n");
     return 0;
   }
 
@@ -73,18 +74,28 @@ int doCycle(struct processor* p){
   toAdd = 2;
   cyclesToAdd = 2;
 
+  printf("Current Instruction: ");
+
   switch(currentInstruction){
     case BRK_impl:
       printf("BRK_impl\n");
 
-      p->status |= I;
+      setFlag(p, I, 1);
+
+      break;
+    case ORA_indX:
+      printf("ORA_indX\n");
+
+      zPAddress += p->x;
+
+      p->a |=
+
+      cyclesToAdd = 6;
 
       break;
     case LDA_im:
       printf("LDA_im\n");
 
-      p->a = zPAddress;
-      
       break;
     case STA_zpg:
       printf("STA_zpg\n");
@@ -98,23 +109,28 @@ int doCycle(struct processor* p){
       printf("ADC_zpg\n");
 
       sumTest = p->a + *getZPG(p->mem, zPAddress);
+
+      setFlag(p, C, sumTest > 0xFF);
+      setFlag(p, Z, sumTest == 0x00);
+      setFlag(p, N, (sumTest & 0x80) == 0x80);
+      printf("%.2X %.2X %.2X\n", (p->a & 0x80) | (*getZPG(p->mem, zPAddress) & 0x80), (sumTest & 0x80), ( (p->a & 0x80) | (*getZPG(p->mem, zPAddress) & 0x80) ) != (sumTest & 0x80));
+      setFlag(p, V, ( (p->a & 0x80) | (*getZPG(p->mem, zPAddress) & 0x80) ) != (sumTest & 0x80));
+
       p->a += *getZPG(p->mem, zPAddress);
 
       cyclesToAdd = 3;
 
-      if(sumTest > 0xFF) {
-        p->status |= C;
-      }
-
       break;
     default:
       printf("ERROR! You shouldn\'t be seeing this.\n");
-      p->status |= I;
+      setFlag(p, I, 1);
       break;
   }
 
   p->pCount += toAdd;
   p->cycles += cyclesToAdd;
+
+  printf("\n");
 
   return 1;
 }
@@ -145,4 +161,10 @@ reg_8* getAbs(reg_8* mem, reg_16 a){
 
 reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o){
   return mem + a + o;
+}
+
+void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN){
+  if(yOrN) p->status |= flag;
+  else if((p->status & flag) == flag) p->status -= flag;
+  else 
 }
