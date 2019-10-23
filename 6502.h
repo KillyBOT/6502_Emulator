@@ -259,4 +259,6 @@ reg_8* getZPG(reg_8* mem, reg_8 a);
 reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o);
 reg_8* getAbs(reg_8* mem, reg_16 a);
 reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);
+reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x);
+reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y);
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN);

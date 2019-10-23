@@ -5,5 +5,8 @@ lda #01
 sta $00
 lda #03
 adc $00
-sta $00
+lda #00
+sta $0401
+lda #00
+sta $0400
 .END

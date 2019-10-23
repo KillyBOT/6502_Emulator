@@ -62,15 +62,15 @@ int doCycle(struct processor* p){
   }
 
   reg_8 currentInstruction;
-  reg_8 zPAddress; // Also can be the immediate too!
-  reg_16 absAddress;
+  reg_8 read_8; // Zero page and immediate
+  reg_16 read_16;
   reg_8 toAdd;
   reg_16 sumTest;
   long cyclesToAdd;
 
   currentInstruction = *(p->mem + p->pCount);
-  zPAddress = *(p->mem + p->pCount + 1);
-  absAddress = getFlipped(p->mem, 1, 2);
+  read_8 = *(p->mem + p->pCount + 1);
+  read_16 = getFlipped(p->mem, 1, 2);
   toAdd = 2;
   cyclesToAdd = 2;
 
@@ -86,9 +86,10 @@ int doCycle(struct processor* p){
     case ORA_indX:
       printf("ORA_indX\n");
 
-      zPAddress += p->x;
+      p->a |= *getIndX(p->mem, read_8, p->x);
 
-      p->a |=
+      setFlag(p, Z, p->a == 0);
+      setFlag(p, N, (p->a & 0x80) == 0x80);
 
       cyclesToAdd = 6;
 
@@ -96,34 +97,48 @@ int doCycle(struct processor* p){
     case LDA_im:
       printf("LDA_im\n");
 
+      p->a = read_8;
+
+      setFlag(p, Z, p->a == 0);
+      setFlag(p, N, (p->a && 0x80) == 0x80);
+
       break;
     case STA_zpg:
       printf("STA_zpg\n");
 
-      *getZPG(p->mem, zPAddress) = p->a;
+      *getZPG(p->mem, read_8) = p->a;
 
       cyclesToAdd = 3;
+
+      break;
+    case STA_abs:
+      printf("STA_abs\n");
+
+      *getAbs(p->mem, read_16) = p->a;
+      toAdd += 1;
+      cyclesToAdd = 4;
 
       break;
     case ADC_zpg:
       printf("ADC_zpg\n");
 
-      sumTest = p->a + *getZPG(p->mem, zPAddress);
+      sumTest = p->a + *getZPG(p->mem, read_8);
+      printf("%.2X %.2X\n", p->a, *getZPG(p->mem, read_8));
 
       setFlag(p, C, sumTest > 0xFF);
       setFlag(p, Z, sumTest == 0x00);
       setFlag(p, N, (sumTest & 0x80) == 0x80);
-      printf("%.2X %.2X %.2X\n", (p->a & 0x80) | (*getZPG(p->mem, zPAddress) & 0x80), (sumTest & 0x80), ( (p->a & 0x80) | (*getZPG(p->mem, zPAddress) & 0x80) ) != (sumTest & 0x80));
-      setFlag(p, V, ( (p->a & 0x80) | (*getZPG(p->mem, zPAddress) & 0x80) ) != (sumTest & 0x80));
+      setFlag(p, V, ( (p->a & 0x80) | (*getZPG(p->mem, read_8) & 0x80) ) != (sumTest & 0x80));
 
-      p->a += *getZPG(p->mem, zPAddress);
+      p->a += *getZPG(p->mem, read_8);
 
       cyclesToAdd = 3;
 
       break;
     default:
-      printf("ERROR! You shouldn\'t be seeing this.\n");
-      setFlag(p, I, 1);
+      printf("ERROR: Illegal opcode.\n");
+      //setFlag(p, I, 1);
+      return 0;
       break;
   }
 
@@ -163,8 +178,17 @@ reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o){
   return mem + a + o;
 }
 
+reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x){
+  reg_16 address = getFlipped(mem + a + x, 0, 1);
+  return mem + address;
+}
+
+reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y){
+  reg_16 address = getFlipped(mem + a, 0, 1);
+  return mem + address + y;
+}
+
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN){
   if(yOrN) p->status |= flag;
-  else if((p->status & flag) == flag) p->status -= flag;
-  else 
+  else if( (p->status & flag) == flag) p->status -= flag;
 }
