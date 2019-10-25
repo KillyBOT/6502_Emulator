@@ -3,10 +3,8 @@
 
 lda #01
 sta $00
-lda #03
-adc $00
-lda #00
-sta $0401
-lda #00
-sta $0400
+lda #02
+ora ($00,X)
+asl $00
+
 .END

@@ -94,6 +94,31 @@ int doCycle(struct processor* p){
       cyclesToAdd = 6;
 
       break;
+
+    case ORA_zpg:
+      printf("ORA_zpg\n");
+
+      p->a |= *getZPG(p->mem, read_8);
+
+      setFlag(p, Z, p->a == 0);
+      setFlag(p, N, (p->a & 0x80) == 0x80);
+
+      cyclesToAdd = 3;
+
+      break;
+
+    case ASL_zpg:
+      printf("ASL_zpg\n");
+
+      setFlag(p, C, (*getZPG(p->mem, read_8) << 7) >> 7);
+      *getZPG(p->mem, read_8) <<= 1;
+      setFlag(p, Z, *getZPG(p->mem, read_8) == 0);
+      setFlag(p, N, (*getZPG(p->mem, read_8) & 0x80) == 0x80);
+
+      cyclesToAdd = 5;
+
+      break;
+      
     case LDA_im:
       printf("LDA_im\n");
 
@@ -123,7 +148,7 @@ int doCycle(struct processor* p){
       printf("ADC_zpg\n");
 
       sumTest = p->a + *getZPG(p->mem, read_8);
-      printf("%.2X %.2X\n", p->a, *getZPG(p->mem, read_8));
+      //printf("%.2X %.2X\n", p->a, *getZPG(p->mem, read_8));
 
       setFlag(p, C, sumTest > 0xFF);
       setFlag(p, Z, sumTest == 0x00);
