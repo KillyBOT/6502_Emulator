@@ -1,11 +1,20 @@
+ifeq ($(DEBUG), true)
+	CC = gcc -g
+else
+	CC = gcc
+endif
+
 all: main.o instructions.o
-	gcc -o 6502Emulator -g main.o instructions.o
+	$(CC) -o 6502Emulator main.o instructions.o
 
 main.o: main.c 6502.h
-	gcc -c -g main.c
+	$(CC) -c main.c
 
 instructions.o: instructions.c 6502.h
-	gcc -c -g instructions.c
+	$(CC) -c instructions.c
 
 clean:
 	rm *.o
+
+memcheck:
+	valgrind --leak-check=yes ./6502Emulator

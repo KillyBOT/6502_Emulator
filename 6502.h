@@ -215,32 +215,22 @@ Bit 0: Carry (C)
 typedef unsigned short reg_16;
 typedef unsigned char reg_8;
 
-/*enum addr_mode {none,
-  impl, //implicit
+enum addr_mode {
   a, //Absolute
   im, //Immediate
   zpg, //Zero page
-  zpgX1, //Zero Page X stage 1: add X
-  zpgX2, //Zero Page X stage 2: find variable
-  zpgY,
-  rel,
-  absN1,
-  absN2,
-  absX1,
-  absX2,
-  absY1,
-  absY2,
-  ind,
-  indX1,
-  indX2,
-  indY1,
-  indY2};
-*/
+  absN, //Absolute
+  absX, //Absolute X
+  absY, //Absolute Y
+  ind, //Indirect
+  indX, //Indirect X
+  indY //Indirect Y
+};
+
 struct processor{
   reg_8* mem; //Memory
   reg_16 pCount; //Program counter
   reg_8 stPtr; //Stack pointer
-  reg_8 stReg; //Status register
   reg_8 a; //Accumulator
   reg_8 x; //Register X
   reg_8 y; //Register Y
@@ -262,3 +252,28 @@ reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);
 reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x);
 reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y);
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN);
+
+void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void cpy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void dec(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void dex(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void dey(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void eor(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void inc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void inx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void iny(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void lda(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ldx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ldy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void lsr(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ora(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void rol(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ror(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void sbc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void sta(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void stx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void sty(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);

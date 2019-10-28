@@ -7,7 +7,6 @@ struct processor* initProcessor(){
   p->mem = calloc(sizeof(reg_8), 0x10000);
   p->pCount = 0x800;
   p->stPtr = 0x00;
-  p->stReg = 0x00;
   p->a = 0x00;
   p->x = 0x00;
   p->y = 0x00;
@@ -27,6 +26,8 @@ void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem){
     //printf("%.2X\n", *buffer);
   }
 
+  free(buffer);
+
   printf("Program loaded!\n");
 }
 
@@ -41,8 +42,8 @@ void memDump(reg_8* mem, reg_16 start, reg_16 size){
 }
 
 void printProcessor(struct processor* p){
-  printf("PC   A  X  Y  SR SP NV-BDIZC\n");
-  printf("%.4X %.2X %.2x %.2X %.2X %.2X ", p->pCount, p->a, p->x, p->y, p->stReg, p->stPtr);
+  printf("PC   A  X  Y  SP NV-BDIZC\n");
+  printf("%.4X %.2X %.2X %.2X %.2X ", p->pCount, p->a, p->x, p->y, p->stPtr);
 
   for(int x = 7; x >= 0; x--) printf("%.1X", (p->status >> x) & 1);
   printf("\n");
@@ -83,79 +84,11 @@ int doCycle(struct processor* p){
       setFlag(p, I, 1);
 
       break;
-    case ORA_indX:
-      printf("ORA_indX\n");
+    case PHP_impl:
+      printf("PHP_impl\n");
 
-      p->a |= *getIndX(p->mem, read_8, p->x);
-
-      setFlag(p, Z, p->a == 0);
-      setFlag(p, N, (p->a & 0x80) == 0x80);
-
-      cyclesToAdd = 6;
-
-      break;
-
-    case ORA_zpg:
-      printf("ORA_zpg\n");
-
-      p->a |= *getZPG(p->mem, read_8);
-
-      setFlag(p, Z, p->a == 0);
-      setFlag(p, N, (p->a & 0x80) == 0x80);
-
-      cyclesToAdd = 3;
-
-      break;
-
-    case ASL_zpg:
-      printf("ASL_zpg\n");
-
-      setFlag(p, C, (*getZPG(p->mem, read_8) << 7) >> 7);
-      *getZPG(p->mem, read_8) <<= 1;
-      setFlag(p, Z, *getZPG(p->mem, read_8) == 0);
-      setFlag(p, N, (*getZPG(p->mem, read_8) & 0x80) == 0x80);
-
-      cyclesToAdd = 5;
-
-      break;
-      
-    case LDA_im:
-      printf("LDA_im\n");
-
-      p->a = read_8;
-
-      setFlag(p, Z, p->a == 0);
-      setFlag(p, N, (p->a && 0x80) == 0x80);
-
-      break;
-    case STA_zpg:
-      printf("STA_zpg\n");
-
-      *getZPG(p->mem, read_8) = p->a;
-
-      cyclesToAdd = 3;
-
-      break;
-    case STA_abs:
-      printf("STA_abs\n");
-
-      *getAbs(p->mem, read_16) = p->a;
-      toAdd += 1;
-      cyclesToAdd = 4;
-
-      break;
-    case ADC_zpg:
-      printf("ADC_zpg\n");
-
-      sumTest = p->a + *getZPG(p->mem, read_8);
-      //printf("%.2X %.2X\n", p->a, *getZPG(p->mem, read_8));
-
-      setFlag(p, C, sumTest > 0xFF);
-      setFlag(p, Z, sumTest == 0x00);
-      setFlag(p, N, (sumTest & 0x80) == 0x80);
-      setFlag(p, V, ( (p->a & 0x80) | (*getZPG(p->mem, read_8) & 0x80) ) != (sumTest & 0x80));
-
-      p->a += *getZPG(p->mem, read_8);
+      *(p->mem + SYSTEM_STACK_BEGIN + p->stPtr) = p->status;
+      p->stPtr += 1;
 
       cyclesToAdd = 3;
 
@@ -217,3 +150,52 @@ void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN){
   if(yOrN) p->status |= flag;
   else if( (p->status & flag) == flag) p->status -= flag;
 }
+
+
+
+void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a){
+  long cAdd = 2; //Cycles to add
+  reg_16 pAdd = 2; //Program pointer increment amount
+  int added;
+  reg_8 sign1 = p->a;
+  reg_8 sign2;
+
+  switch(a){
+    case im:
+      added = p->a + read_8;
+      sign2 = read_8;
+      p->a += read_8;
+      break;
+    default:
+      printf("Unaccounted addressing mode\n");
+      break;
+  }
+  setFlag(p, C, added > 0xff);
+  setFlag(p, Z, p->a == 0);
+  setflag(p, V, (sign1 >> 7) || (sign2 >> 7) == (p->a >> 7));
+  setFlag(p, N, (p->a & 0x80) == 0x80);
+
+}
+void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void cpy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void dec(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void dex(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void dey(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void eor(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void inc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void inx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void iny(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void lda(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ldx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ldy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void lsr(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ora(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void rol(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void ror(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void sbc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void sta(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void stx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void sty(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
