@@ -7,6 +7,8 @@ endif
 all: main.o instructions.o
 	$(CC) -o 6502Emulator main.o instructions.o
 
+test: testLinkedList.o 
+
 main.o: main.c 6502.h
 	$(CC) -c main.c
 

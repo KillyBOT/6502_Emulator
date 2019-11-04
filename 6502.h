@@ -219,6 +219,7 @@ enum addr_mode {
   a, //Absolute
   im, //Immediate
   zpg, //Zero page
+  zpgX, //Zero page X
   absN, //Absolute
   absX, //Absolute X
   absY, //Absolute Y
@@ -251,6 +252,7 @@ reg_8* getAbs(reg_8* mem, reg_16 a);
 reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);
 reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x);
 reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y);
+reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN);
 
 void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);

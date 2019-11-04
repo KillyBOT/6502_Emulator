@@ -146,6 +146,39 @@ reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y){
   return mem + address + y;
 }
 
+reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a){
+  switch(a){
+    case im:
+      return read_8;
+    case zpg:
+      return mem + read_8;
+    case zpgX:
+      toAdd = *getZPGOffset(p->mem, read_8, p->x);
+      break;
+    case absN:
+      toAdd = *getAbs(p->mem, read_16);
+      break;
+    case absX:
+      toAdd = *getAbsOffset(p->mem, read_16, p->x);
+      if(read_16 + p->x > 0xffff) p->cycles++;
+      break;
+    case absY:
+      toAdd = *getAbsOffset(p->mem, read_16, p->y);
+      if(read_16 + p->y > 0xffff) p->cycles++;
+      break;
+    case indX:
+      toAdd = *getIndX(p->mem, read_16, p->x);
+      break;
+    case indY:
+      toAdd = *getIndY(p->mem, read_16, p->y);
+      if(read_16 + p->y > 0xffff) p->cycles++;
+      break;
+    default:
+      printf("Unaccounted addressing mode\n");
+      break;
+  }
+}
+
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN){
   if(yOrN) p->status |= flag;
   else if( (p->status & flag) == flag) p->status -= flag;
@@ -154,29 +187,68 @@ void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN){
 
 
 void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a){
-  long cAdd = 2; //Cycles to add
-  reg_16 pAdd = 2; //Program pointer increment amount
-  int added;
   reg_8 sign1 = p->a;
-  reg_8 sign2;
+  reg_8 toAdd;
 
   switch(a){
     case im:
-      added = p->a + read_8;
-      sign2 = read_8;
-      p->a += read_8;
+      toAdd = read_8;
+      break;
+    case zpg:
+      toAdd = *getZPG(p->mem, read_8);
+      break;
+    case zpgX:
+      toAdd = *getZPGOffset(p->mem, read_8, p->x);
+      break;
+    case absN:
+      toAdd = *getAbs(p->mem, read_16);
+      break;
+    case absX:
+      toAdd = *getAbsOffset(p->mem, read_16, p->x);
+      if(read_16 + p->x > 0xffff) p->cycles++;
+      break;
+    case absY:
+      toAdd = *getAbsOffset(p->mem, read_16, p->y);
+      if(read_16 + p->y > 0xffff) p->cycles++;
+      break;
+    case indX:
+      toAdd = *getIndX(p->mem, read_16, p->x);
+      break;
+    case indY:
+      toAdd = *getIndY(p->mem, read_16, p->y);
+      if(read_16 + p->y > 0xffff) p->cycles++;
       break;
     default:
       printf("Unaccounted addressing mode\n");
       break;
   }
+
+  added = p->a + toAdd;
+  p->a += toAdd;
+
   setFlag(p, C, added > 0xff);
   setFlag(p, Z, p->a == 0);
-  setflag(p, V, (sign1 >> 7) || (sign2 >> 7) == (p->a >> 7));
+  setflag(p, V, (sign1 >> 7) || (toAdd >> 7) == (p->a >> 7));
   setFlag(p, N, (p->a & 0x80) == 0x80);
 
 }
-void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a){
+  reg_8 toAnd;
+
+  switch(a){
+    case im:
+      toAnd = read_8;
+    case zpg:
+      toAnd =
+    case zpgX:
+      p->a &= *getZPGOffset(p->mem, read_8, p->x);
+      break;
+    case absN:
+      p->a &= *getAbs(p->mem, read_16);
+      break;
+    case absX:
+  }
+}
 void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
