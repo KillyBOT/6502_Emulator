@@ -216,7 +216,6 @@ typedef unsigned short reg_16;
 typedef unsigned char reg_8;
 
 enum addr_mode {
-  a, //Absolute
   im, //Immediate
   zpg, //Zero page
   zpgX, //Zero page X
@@ -225,7 +224,8 @@ enum addr_mode {
   absY, //Absolute Y
   ind, //Indirect
   indX, //Indirect X
-  indY //Indirect Y
+  indY, //Indirect Y
+  a //Accumulator
 };
 
 struct processor{
@@ -246,17 +246,18 @@ void printProcessor(struct processor* p);
 int doCycle(struct processor *p);
 
 reg_16 getFlipped(reg_8* mem, reg_8 pos1, reg_8 pos2);
-reg_8* getZPG(reg_8* mem, reg_8 a);
+/*reg_8* getZPG(reg_8* mem, reg_8 a);
 reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o);
 reg_8* getAbs(reg_8* mem, reg_16 a);
 reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);
 reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x);
-reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y);
-reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y);*/
+reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN);
 
 void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
+void asl(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
