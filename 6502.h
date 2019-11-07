@@ -219,6 +219,7 @@ enum addr_mode {
   im, //Immediate
   zpg, //Zero page
   zpgX, //Zero page X
+  zpgY, //Zero page Y
   absN, //Absolute
   absX, //Absolute X
   absY, //Absolute Y
@@ -263,12 +264,8 @@ void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void cpy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void dec(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
-void dex(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
-void dey(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void eor(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void inc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
-void inx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
-void iny(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void lda(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void ldx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);
 void ldy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode a);

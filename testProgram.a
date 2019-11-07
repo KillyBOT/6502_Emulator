@@ -4,7 +4,7 @@
 lda #01
 sta $00
 lda #02
-ora ($00,X)
-asl $00
+adc $00
+sta $00
 
 .END
