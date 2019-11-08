@@ -222,10 +222,13 @@ enum addr_mode {
   zpgY, //Zero page Y
   absN, //Absolute
   absX, //Absolute X
+  absXP, //Absolute X, taking page crossing into account
   absY, //Absolute Y
+  absYP, //Absolute Y, taking page crossing into account
   ind, //Indirect
   indX, //Indirect X
   indY, //Indirect Y
+  indYP, //Indirect Y, taking page crossing into account
   a //Accumulator
 };
 

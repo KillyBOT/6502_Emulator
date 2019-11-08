@@ -65,7 +65,7 @@ int doCycle(struct processor* p){
   reg_8 currentInstruction;
   reg_8 read_8; // Zero page and immediate
   reg_16 read_16;
-  reg_8 pToAdd;
+  char pToAdd;
   reg_16 sumTest;
   long cyclesToAdd;
 
@@ -86,6 +86,18 @@ int doCycle(struct processor* p){
       pToAdd = 1;
       cyclesToAdd = 7;
 
+      break;
+    case BCC_rel:
+      printf("BCC_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & C)){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
       break;
     case LDA_im:
       printf("LDA_im\n");
@@ -122,32 +134,6 @@ reg_16 getFlipped(reg_8* mem, reg_8 pos1, reg_8 pos2){
   return final;
 }
 
-/*reg_8* getZPG(reg_8* mem, reg_8 a){
-  return mem + a;
-}
-
-reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o){
-  return mem + a + o;
-}
-
-reg_8* getAbs(reg_8* mem, reg_16 a){
-  return mem + a;
-}
-
-reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o){
-  return mem + a + o;
-}
-
-reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x){
-  reg_16 address = getFlipped(mem + a + x, 0, 1);
-  return mem + address;
-}
-
-reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y){
-  reg_16 address = getFlipped(mem + a, 0, 1);
-  return mem + address + y;
-}*/
-
 reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   switch(mode){
     case zpg:
@@ -159,21 +145,27 @@ reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode 
     case absN:
       return p->mem + read_16;
     case absX:
+      return p->mem + ((read_16 + p->x) & 0xffff);
+    case absXP:
       if(read_16 + p->x > 0xffff) p->cycles++;
       return p->mem + ((read_16 + p->x) & 0xffff);
     case absY:
+      return p->mem + ((read_16 + p->y) & 0xffff);
+    case absYP:
       if(read_16 + p->y > 0xffff) p->cycles++;
       return p->mem + ((read_16 + p->y) & 0xffff);
     case indX:
       return p->mem + getFlipped(p->mem + read_8 + p->x, 0, 1);
     case indY:
+      return p->mem + getFlipped(p->mem + read_16, 0, 1) + p->y;
+    case indYP:
       if(getFlipped(p->mem + read_16, 0, 1) + p->y > 0xffff) p->cycles++;
       return p->mem + getFlipped(p->mem + read_16, 0, 1) + p->y;
     case a:
       return &p->a;
     default:
       printf("Unaccounted addressing mode\n");
-      return 0;
+      return NULL;
   }
 }
 
@@ -188,49 +180,16 @@ void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   reg_8 sign1 = p->a;
   reg_8 toAdd = read_8;
   if(mode != im) toAdd= *getVal(p, read_8, read_16, mode);
-
-  /*switch(a){
-    case im:
-      toAdd = read_8;
-      break;
-    case zpg:
-      toAdd = *getZPG(p->mem, read_8);
-      break;
-    case zpgX:
-      toAdd = *getZPGOffset(p->mem, read_8, p->x);
-      break;
-    case absN:
-      toAdd = *getAbs(p->mem, read_16);
-      break;
-    case absX:
-      toAdd = *getAbsOffset(p->mem, read_16, p->x);
-      if(read_16 + p->x > 0xffff) p->cycles++;
-      break;
-    case absY:
-      toAdd = *getAbsOffset(p->mem, read_16, p->y);
-      if(read_16 + p->y > 0xffff) p->cycles++;
-      break;
-    case indX:
-      toAdd = *getIndX(p->mem, read_16, p->x);
-      break;
-    case indY:
-      toAdd = *getIndY(p->mem, read_16, p->y);
-      if(read_16 + p->y > 0xffff) p->cycles++;
-      break;
-    default:
-      printf("Unaccounted addressing mode\n");
-      break;
-  }*/
-  setFlag(p, C, sign1 + toAdd > 0xff);
+  toAdd += (p->status & C);
 
   p->a += toAdd;
 
+  setFlag(p, C, sign1 + toAdd > 0xff);
   setFlag(p, Z, p->a == 0);
   setFlag(p, V, (sign1 >> 7) || (toAdd >> 7) == (p->a >> 7));
   setFlag(p, N, (p->a & 0x80) == 0x80);
 
 }
-
 void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toAnd = read_8;
   if(mode != im) toAnd = *getVal(p, read_8, read_16, mode);
@@ -240,7 +199,6 @@ void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode
   setFlag(p, N, (p->a && 0x80) == 0x80);
 
 }
-
 void asl(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 oldBit = (*getVal(p, read_8, read_16, mode) & 0x80) >> 7;
 
@@ -250,7 +208,6 @@ void asl(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, *getVal(p, read_8, read_16, mode) == 0);
   setFlag(p, N, (*getVal(p, read_8, read_16, mode) & 0x80) == 0x80);
 }
-
 void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 test = *getVal(p, read_8, read_16, mode);
 
@@ -258,7 +215,6 @@ void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, V, (test & 0b00100000) >> 5);
   setFlag(p, N, (test & 0b01000000) >> 6);
 }
-
 void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toCmp = read_8;
   if(mode != im) toCmp = *getVal(p, read_8, read_16, mode);
@@ -267,7 +223,6 @@ void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->a == toCmp);
   setFlag(p, N, (p->a & 0x80) == 0x80);
 }
-
 void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toCmp = read_8;
   if(mode != im) toCmp = *getVal(p, read_8, read_16, mode);
@@ -276,7 +231,6 @@ void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->x == toCmp);
   setFlag(p, N, (p->x & 0x80) == 0x80);
 }
-
 void cpy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toCmp = read_8;
   if(mode != im) toCmp = *getVal(p, read_8, read_16, mode);
@@ -285,14 +239,12 @@ void cpy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->y == toCmp);
   setFlag(p, N, (p->y & 0x80) == 0x80);
 }
-
 void dec(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   *getVal(p, read_8, read_16, mode)-=1;
 
   setFlag(p, Z, *getVal(p, read_8, read_16, mode) == 0);
   setFlag(p, N, (*getVal(p, read_8, read_16, mode) & 0x80) == 0x80);
 }
-
 void eor(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toXOR = read_8;
   if(mode != im) toXOR = *getVal(p, read_8, read_16, mode);
@@ -302,14 +254,12 @@ void eor(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->a == 0);
   setFlag(p, N, (p->a & 0x80) == 0x80);
 }
-
 void inc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   *getVal(p, read_8, read_16, mode)+=1;
 
   setFlag(p, Z, p->a == 0);
   setFlag(p, N, (p->a & 0x80) == 0x80);
 }
-
 void lda(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   if(mode == im) p->a = read_8;
   else p->a = *getVal(p, read_8, read_16, mode);
@@ -317,7 +267,6 @@ void lda(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->a == 0);
   setFlag(p, N, (p->a & 0x80) == 0x80);
 }
-
 void ldx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   if(mode == im) p->x = read_8;
   else p->x = *getVal(p, read_8, read_16, mode);
@@ -325,7 +274,6 @@ void ldx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->x == 0);
   setFlag(p, N, (p->x & 0x80) == 0x80);
 }
-
 void ldy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   if(mode == im) p->y = read_8;
   else p->y = *getVal(p, read_8, read_16, mode);
@@ -333,7 +281,6 @@ void ldy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->y == 0);
   setFlag(p, N, (p->y & 0x80) == 0x80);
 }
-
 void lsr(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 oldVal = *getVal(p, read_8, read_16, mode) & 0x01;
 
@@ -352,9 +299,48 @@ void ora(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   setFlag(p, Z, p->a == 0);
   setFlag(p, N, (p->a & 0x80) == 0x80);
 }
-void rol(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
-void ror(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
-void sbc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
-void sta(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
-void stx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
-void sty(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
+void rol(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
+  reg_8 oldVal = (*getVal(p, read_8, read_16, mode) & 0x80) >> 7;
+  reg_8 toAdd = (p->status & 1);
+
+  *getVal(p, read_8, read_16, mode) <<= 1;
+  *getVal(p, read_8, read_16, mode) |= toAdd;
+
+  setFlag(p, C, oldVal);
+  setFlag(p, Z, *getVal(p, read_8, read_16, mode) == 0);
+  setFlag(p, N, (*getVal(p, read_8, read_16, mode) & 0x80) == 0x80);
+
+}
+void ror(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
+  reg_8 oldVal = (*getVal(p, read_8, read_16, mode) & 0x01);
+  reg_8 toAdd = (p->status & 1) << 7;
+
+  *getVal(p, read_8, read_16, mode) >>= 1;
+  *getVal(p, read_8, read_16, mode) |= toAdd;
+
+  setFlag(p, C, oldVal);
+  setFlag(p, Z, *getVal(p, read_8, read_16, mode) == 0);
+  setFlag(p, N, (*getVal(p, read_8, read_16, mode) & 0x80) == 0x80);
+}
+void sbc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
+  reg_8 sign1 = p->a;
+  reg_8 toAdd = read_8;
+  if(mode != im) toAdd= *getVal(p, read_8, read_16, mode);
+  toAdd -= (1 - (p->status & C));
+
+  p->a -= toAdd;
+
+  setFlag(p, C, sign1 + toAdd > 0xff);
+  setFlag(p, Z, p->a == 0);
+  setFlag(p, V, (sign1 >> 7) || (toAdd >> 7) == (p->a >> 7));
+  setFlag(p, N, (p->a & 0x80) == 0x80);
+}
+void sta(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
+  *getVal(p, read_8, read_16, mode) = p->a;
+}
+void stx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
+  *getVal(p, read_8, read_16, mode) = p->x;
+}
+void sty(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
+  *getVal(p, read_8, read_16, mode) = p->y;
+}
