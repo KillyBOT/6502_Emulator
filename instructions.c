@@ -95,7 +95,7 @@ int doCycle(struct processor* p){
 
       if((p->status & C)){
         cyclesToAdd++;
-        if(p->pCount + (char)read_8 > 0xffff) cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
         pToAdd += (char)read_8;
       }
       break;
