@@ -87,17 +87,139 @@ int doCycle(struct processor* p){
       cyclesToAdd = 7;
 
       break;
+    case BEQ_rel:
+      printf("BEQ_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & Z) == Z){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
+    case BNE_rel:
+
+      printf("BNE_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & Z) == 0){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
+    case BMI_rel:
+      printf("BMI_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & N) == N){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
+    case BPL_rel:
+      printf("BPL_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & N) == 0){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
+    case BCS_rel:
+      printf("BCS_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & C) == C){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
     case BCC_rel:
       printf("BCC_rel\n");
 
       pToAdd = 2;
       cyclesToAdd = 2;
 
-      if((p->status & C)){
+      if((p->status & C) == 0){
         cyclesToAdd++;
         if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
         pToAdd += (char)read_8;
       }
+
+      break;
+    case BVC_rel:
+      printf("BVC_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & V) == 0){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
+    case BVS_rel:
+      printf("BVC_rel\n");
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      if((p->status & V) == V){
+        cyclesToAdd++;
+        if(p->pCount + (char)read_8 > 0xffff || p->pCount + (char)read_8 < 0x0000) cyclesToAdd++;
+        pToAdd += (char)read_8;
+      }
+
+      break;
+
+    case CLC_impl:
+      printf("CLC_impl\n");
+
+      setFlag(p, C, 0);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+
+    case CLD_impl:
+      printf("CLD_impl\n");
+
+      setFlag(p, D, 0);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case CLI_impl:
+      printf("CLC_impl\n");
+
+      setFlag(p, I, 0);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
       break;
     case LDA_im:
       printf("LDA_im\n");
@@ -106,7 +228,108 @@ int doCycle(struct processor* p){
 
       pToAdd = 2;
       cyclesToAdd = 2;
+
       break;
+    case CLV_impl:
+      printf("CLV_impl\n");
+
+      setFlag(p, V, 0);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case DEX_impl:
+      printf("DEX_impl\n");
+
+      p->x--;
+
+      setFlag(p, Z, p->x == 0);
+      setFlag(p, N, (p->x & 0x80) == 0x80);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case DEY_impl:
+      printf("DEY_impl\n");
+
+      p->y--;
+
+      setFlag(p, Z, p->y == 0);
+      setFlag(p, N, (p->y & 0x80) == 0x80);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case INX_impl:
+      printf("INX_impl\n");
+
+      p->x++;
+
+      setFlag(p, Z, p->x == 0);
+      setFlag(p, N, (p->x & 0x80) == 0x80);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case INY_impl:
+      printf("INY_impl\n");
+
+      p->y++;
+
+      setFlag(p, Z, p->y == 0);
+      setFlag(p, N, (p->y & 0x80) == 0x80);
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case JMP_abs:
+      printf("JMP_abs\n");
+
+      p->pCount = read_16;
+
+      pToAdd = 3;
+      cyclesToAdd = 5;
+
+      break;
+    case JMP_ind:
+      printf("JMP_ind");
+
+      p->pCount = getFlipped(getVal(p, read_8, read_16, absN),0,1);
+    case LDA_zpg:
+      printf("LDA_zpg\n");
+
+      lda(p, read_8, read_16, zpg);
+
+      pToAdd = 2;
+      cyclesToAdd = 3;
+
+      break;
+
+    case CMP_zpg:
+      printf("CMP_zpg");
+
+      cmp(p, read_8, read_16, zpg);
+
+      pToAdd = 2;
+      cyclesToAdd = 3;
+
+      break;
+
+    case LDX_im:
+      printf("LDX_im\n");
+
+      ldx(p, read_8, read_16, im);
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
+
+      break;
+
     default:
       printf("ERROR: Illegal opcode.\n");
       //setFlag(p, I, 1);
