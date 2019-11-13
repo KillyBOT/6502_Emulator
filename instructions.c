@@ -299,7 +299,15 @@ int doCycle(struct processor* p){
     case JMP_ind:
       printf("JMP_ind");
 
-      p->pCount = getFlipped(getVal(p, read_8, read_16, absN),0,1);
+      reg_16 indTo = 0;
+      indTo |= *getVal(p, read_8, read_16 & 0xFF00, absN);
+      indTo <<= 8;
+      indTo |= *getVal(p, read_8, read_16, absN);
+
+      pToAdd = 3;
+      cyclesToAdd = 5;
+
+      break;
     case LDA_zpg:
       printf("LDA_zpg\n");
 
