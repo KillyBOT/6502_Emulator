@@ -247,15 +247,10 @@ void readInstructions(FILE* fp, reg_16 programPointerStart, reg_8* mem);
 void memDump(reg_8* memory, reg_16 start, reg_16 size);
 struct processor* initProcessor();
 void printProcessor(struct processor* p);
+void printStack(struct processor* p);
 int doCycle(struct processor *p);
 
 reg_16 getFlipped(reg_8* mem, reg_8 pos1, reg_8 pos2);
-/*reg_8* getZPG(reg_8* mem, reg_8 a);
-reg_8* getZPGOffset(reg_8* mem, reg_8 a, reg_8 o);
-reg_8* getAbs(reg_8* mem, reg_16 a);
-reg_8* getAbsOffset(reg_8* mem, reg_16 a, reg_8 o);
-reg_8* getIndX(reg_8* mem, reg_8 a, reg_8 x);
-reg_8* getIndY(reg_8* mem, reg_8 a, reg_8 y);*/
 reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode);
 void setFlag(struct processor* p, reg_8 flag, reg_8 yOrN);
 

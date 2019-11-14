@@ -1,11 +1,11 @@
 !to "testProgram.o", cbm
 *= $0200
 
-  ldx #00
-  lda #01
-  cmp $21
-BNE DONE
-  BRK
-DONE
-  lda #128
-  BRK
+lda #34
+pha
+pha
+pha
+jmp TEST
+BRK
+TEST lda #57
+BRK

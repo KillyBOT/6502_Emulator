@@ -50,9 +50,17 @@ void printProcessor(struct processor* p){
   printf("Cycles: %ld\n", p->cycles);
 }
 
+void printStack(struct processor* p){
+  if(p->stPtr == 0) printf("Empty stack\n");
+  else memDump(p->mem, SYSTEM_STACK_BEGIN, p->stPtr);
+}
+
 int doCycle(struct processor* p){
 
+  printf("Processor:\n");
   printProcessor(p);
+  printf("Stack:\n");
+  printStack(p);
   printf("\n");
 
   //Check flags
@@ -71,9 +79,11 @@ int doCycle(struct processor* p){
 
   currentInstruction = *(p->mem + p->pCount);
   read_8 = *(p->mem + p->pCount + 1);
-  read_16 = getFlipped(p->mem, 1, 2);
+  read_16 = getFlipped(p->mem + p->pCount, 1, 2);
   pToAdd = 2;
   cyclesToAdd = 2;
+  /*printf("1 byte read: %.2X\n", read_8);
+  printf("2 byte read: %.4X\n", read_16);*/
 
   printf("Current Instruction: ");
 
@@ -192,7 +202,6 @@ int doCycle(struct processor* p){
       }
 
       break;
-
     case CLC_impl:
       printf("CLC_impl\n");
 
@@ -202,7 +211,6 @@ int doCycle(struct processor* p){
       cyclesToAdd = 2;
 
       break;
-
     case CLD_impl:
       printf("CLD_impl\n");
 
@@ -218,15 +226,6 @@ int doCycle(struct processor* p){
       setFlag(p, I, 0);
 
       pToAdd = 1;
-      cyclesToAdd = 2;
-
-      break;
-    case LDA_im:
-      printf("LDA_im\n");
-
-      lda(p, read_8, read_16, im);
-
-      pToAdd = 2;
       cyclesToAdd = 2;
 
       break;
@@ -290,22 +289,63 @@ int doCycle(struct processor* p){
     case JMP_abs:
       printf("JMP_abs\n");
 
+      printf("%X\n", read_16);
       p->pCount = read_16;
 
-      pToAdd = 3;
+      pToAdd = 0;
       cyclesToAdd = 5;
 
       break;
     case JMP_ind:
-      printf("JMP_ind");
+      printf("JMP_ind\n");
 
       reg_16 indTo = 0;
       indTo |= *getVal(p, read_8, read_16 & 0xFF00, absN);
       indTo <<= 8;
       indTo |= *getVal(p, read_8, read_16, absN);
 
-      pToAdd = 3;
+      pToAdd = 0;
       cyclesToAdd = 5;
+
+      break;
+    case JSR_abs:
+      printf("JSR_abs\n");
+
+      *(p->mem + SYSTEM_STACK_BEGIN + p->stPtr) = p->pCount & 0xFF;
+      p->stPtr++;
+      *(p->mem + SYSTEM_STACK_BEGIN + p->stPtr) = (p->pCount >> 8) & 0xFF;
+      p->stPtr++;
+
+      p->pCount = read_16;
+
+      pToAdd = 0;
+      cyclesToAdd = 6;
+
+      break;
+    case NOP_impl:
+      printf("NOP_impl\n");
+
+      pToAdd = 1;
+      cyclesToAdd = 2;
+
+      break;
+    case PHA_impl:
+      printf("PHA_impl\n");
+
+      *(p->mem + SYSTEM_STACK_BEGIN + p->stPtr) = p->a;
+      p->stPtr++;
+
+      pToAdd = 1;
+      cyclesToAdd = 3;
+
+      break;
+    case LDA_im:
+      printf("LDA_im\n");
+
+      lda(p, read_8, read_16, im);
+
+      pToAdd = 2;
+      cyclesToAdd = 2;
 
       break;
     case LDA_zpg:
@@ -317,7 +357,6 @@ int doCycle(struct processor* p){
       cyclesToAdd = 3;
 
       break;
-
     case CMP_zpg:
       printf("CMP_zpg");
 
@@ -327,7 +366,6 @@ int doCycle(struct processor* p){
       cyclesToAdd = 3;
 
       break;
-
     case LDX_im:
       printf("LDX_im\n");
 
