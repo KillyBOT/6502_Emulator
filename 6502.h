@@ -10,8 +10,11 @@ https://fms.komkon.org/EMUL8/NES.html#LABC
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
 
-//Structure for registers
+//Structure for registers and other stuff
 
 #define ZERO_PAGE_START 0x0000
 #define ZERO_PAGE_END 0x00ff
@@ -22,6 +25,8 @@ https://fms.komkon.org/EMUL8/NES.html#LABC
 #define INTERRUPER_HANDLER 0xfffa
 #define POWER_RESET 0xfffc
 #define INTERRUPT_REQUEST_HANDLER 0xfffe
+
+#define NES_WAIT_NANOSECONDS 588 //Nanoseconds to wait, for the NES at least
 
 //Flags for the processor status
 
@@ -211,6 +216,11 @@ Bit 0: Carry (C)
 #define SBC_absY 0xf9 //Subtract with carry, absoluteY
 #define SBC_absX 0xfd //Subtract with carry, absoluteY
 #define INC_absX 0xfe //Increment, absoluteX
+
+//Macros
+
+#define CHECKNEGATIVE(X) ( (X & 0x80) == 0x80)
+#define CHECKZERO(X) ((X & 0xff) == 0)
 
 typedef unsigned short reg_16;
 typedef unsigned char reg_8;

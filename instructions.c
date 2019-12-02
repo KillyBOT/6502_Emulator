@@ -1,6 +1,4 @@
 #include "6502.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 struct processor* initProcessor(){
   struct processor* p = malloc(sizeof(struct processor));
@@ -81,6 +79,11 @@ int doCycle(struct processor* p){
   currentInstruction = *(p->mem + p->pCount);
   read_8 = *(p->mem + p->pCount + 1);
   read_16 = getFlipped(p->mem + p->pCount, 1, 2);
+  struct timespec req;
+  struct timespec* rem;
+
+  req.tv_nsec = NES_WAIT_NANOSECONDS;
+  req.tv_sec = 0;
   pToAdd = 2;
   cToAdd = 2;
   /*printf("1 byte read: %.2X\n", read_8);
@@ -246,8 +249,8 @@ int doCycle(struct processor* p){
 
       p->x--;
 
-      setFlag(p, Z, p->x == 0);
-      setFlag(p, N, (p->x & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->x));
+      setFlag(p, N, CHECKNEGATIVE(p->x));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -258,8 +261,8 @@ int doCycle(struct processor* p){
 
       p->y--;
 
-      setFlag(p, Z, p->y == 0);
-      setFlag(p, N, (p->y & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->y));
+      setFlag(p, N, CHECKNEGATIVE(p->y));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -270,8 +273,8 @@ int doCycle(struct processor* p){
 
       p->x++;
 
-      setFlag(p, Z, p->x == 0);
-      setFlag(p, N, (p->x & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->x));
+      setFlag(p, N, CHECKNEGATIVE(p->x));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -282,8 +285,8 @@ int doCycle(struct processor* p){
 
       p->y++;
 
-      setFlag(p, Z, p->y == 0);
-      setFlag(p, N, (p->y & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->y));
+      setFlag(p, N, CHECKNEGATIVE(p->y));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -361,8 +364,8 @@ int doCycle(struct processor* p){
       p->a = *(p->mem + SYSTEM_STACK_BEGIN + p->stPtr);
       //*(p->mem + SYSTEM_STACK_BEGIN + p->stPtr) = 0x00;
 
-      setFlag(p, Z, p->a == 0);
-      setFlag(p, N, (p->a & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->a));
+      setFlag(p, N, CHECKNEGATIVE(p->a));
 
       pToAdd = 1;
       cToAdd = 4;
@@ -447,8 +450,8 @@ int doCycle(struct processor* p){
       printf("TAX_impl\n");
 
       p->x = p->a;
-      setFlag(p, Z, p->x == 0);
-      setFlag(p, N, (p->x & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->x));
+      setFlag(p, N, CHECKNEGATIVE(p->x));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -458,8 +461,8 @@ int doCycle(struct processor* p){
       printf("TAY_impl\n");
 
       p->y = p->a;
-      setFlag(p, Z, p->y == 0);
-      setFlag(p, N, (p->y & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->y));
+      setFlag(p, N, CHECKNEGATIVE(p->y));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -471,8 +474,8 @@ int doCycle(struct processor* p){
       p->stPtr--;
       p->x = *(p->mem + SYSTEM_STACK_BEGIN + p->stPtr);
 
-      setFlag(p, Z, p->x == 0);
-      setFlag(p, N, (p->x & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->x));
+      setFlag(p, N, CHECKNEGATIVE(p->x));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -483,8 +486,8 @@ int doCycle(struct processor* p){
 
       p->a = p->x;
 
-      setFlag(p, Z, p->a == 0);
-      setFlag(p, N, (p->a & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->a));
+      setFlag(p, N, CHECKNEGATIVE(p->a));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -495,8 +498,8 @@ int doCycle(struct processor* p){
 
       p->a = p->y;
 
-      setFlag(p, Z, p->a == 0);
-      setFlag(p, N, (p->a & 0x80) == 0x80);
+      setFlag(p, Z, CHECKZERO(p->a));
+      setFlag(p, N, CHECKNEGATIVE(p->a));
 
       pToAdd = 1;
       cToAdd = 2;
@@ -1097,6 +1100,10 @@ int doCycle(struct processor* p){
 
   printf("\n");
 
+  req.tv_nsec *= cToAdd;
+
+  nanosleep(&req,rem);
+
   return 1;
 }
 
@@ -1163,9 +1170,9 @@ void adc(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   p->a += toAdd;
 
   setFlag(p, C, sign1 + toAdd > 0xff);
-  setFlag(p, Z, p->a == 0);
+  setFlag(p, Z, CHECKZERO(p->a));
+  setFlag(p, N, CHECKNEGATIVE(p->a));
   setFlag(p, V, (sign1 >> 7) || (toAdd >> 7) == (p->a >> 7));
-  setFlag(p, N, (p->a & 0x80) == 0x80);
 
 }
 void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
@@ -1173,8 +1180,8 @@ void and_(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode
   if(mode != im) toAnd = *getVal(p, read_8, read_16, mode);
   p->a &= toAnd;
 
-  setFlag(p, Z, p->a == 0);
-  setFlag(p, N, (p->a && 0x80) == 0x80);
+  setFlag(p, Z, CHECKZERO(p->a));
+  setFlag(p, N, CHECKNEGATIVE(p->a));
 
 }
 void asl(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
@@ -1183,8 +1190,8 @@ void asl(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   *getVal(p, read_8, read_16, mode) <<= 1;
 
   setFlag(p, C, oldBit);
-  setFlag(p, Z, *getVal(p, read_8, read_16, mode) == 0);
-  setFlag(p, N, (*getVal(p, read_8, read_16, mode) & 0x80) == 0x80);
+  setFlag(p, Z, CHECKZERO(*getVal(p, read_8, read_16, mode)));
+  setFlag(p, N, CHECKNEGATIVE(*getVal(p, read_8, read_16, mode)));
 }
 void bit(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 test = *getVal(p, read_8, read_16, mode);
@@ -1198,8 +1205,8 @@ void cmp(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
   if(mode != im) toCmp = *getVal(p, read_8, read_16, mode);
 
   setFlag(p, C, p->a >= toCmp);
-  setFlag(p, Z, p->a == toCmp);
-  setFlag(p, N, (p->a & 0x80) == 0x80);
+  setFlag(p, Z, CHECKZERO(p->a));
+  setFlag(p, N, CHECKNEGATIVE(p->a));
 }
 void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toCmp = read_8;
@@ -1207,7 +1214,7 @@ void cpx(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode)
 
   setFlag(p, C, p->x >= toCmp);
   setFlag(p, Z, p->x == toCmp);
-  setFlag(p, N, (p->x & 0x80) == 0x80);
+  setFlag(p, N, CHECKNEGATIVE(p->x));
 }
 void cpy(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode mode){
   reg_8 toCmp = read_8;

@@ -55,4 +55,6 @@ int main(int argc, char** argv){
   fclose(pgm);
   free(p->mem);
   free(p);
+
+  return 0;
 }
