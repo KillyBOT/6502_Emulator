@@ -97,7 +97,7 @@ Bit 0: Carry (C)
 #define LSR_abs 0x4e //Logical shift right, absolute
 
 #define BVC_rel 0x50 //Branch or overflow clear, relative
-#define EOR_intY 0x51 //Exclusive or, indirectY
+#define EOR_indY 0x51 //Exclusive or, indirectY
 #define EOR_zpgX 0x55 //Exclusive or, zeroPageX
 #define LSR_zpgX 0x56 //Logical shift right, zeroPageX
 #define CLI_impl 0x58 //Clear interrupt disable, implicit

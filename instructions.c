@@ -708,6 +708,25 @@ int doCycle(struct processor* p){
 
       break;
 
+    case BIT_zpg:
+      printf("BIT_zpg\n");
+
+      bit(p,read_8,read_16,zpg);
+
+      pToAdd = 2;
+      cToAdd = 3;
+
+      break;
+    case BIT_abs:
+      printf("BIT_abs\n");
+
+      bit(p,read_8,read_16,absN);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+
     case CMP_im:
       printf("CMP_im\n");
 
@@ -715,6 +734,271 @@ int doCycle(struct processor* p){
 
       pToAdd = 2;
       cToAdd = 2;
+
+      break;
+    case CMP_zpg:
+      printf("CMP_zpg\n");
+
+      cmp(p, read_8, read_16, zpg);
+
+      pToAdd = 2;
+      cToAdd = 3;
+
+      break;
+    case CMP_zpgX:
+      printf("CMP_zpgX\n");
+
+      cmp(p, read_8, read_16, zpgX);
+
+      pToAdd = 2;
+      cToAdd = 4;
+
+      break;
+    case CMP_abs:
+      printf("CMP_abs\n");
+
+      cmp(p, read_8, read_16, absN);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case CMP_absX:
+      printf("CMP_absX\n");
+
+      cmp(p, read_8, read_16, absXP);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case CMP_absY:
+      printf("CMP_absY\n");
+
+      cmp(p, read_8, read_16, absYP);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case CMP_indX:
+      printf("CMP_indX\n");
+
+      cmp(p, read_8, read_16, indX);
+
+      pToAdd = 2;
+      cToAdd = 6;
+
+      break;
+    case CMP_indY:
+      printf("CMP_indY\n");
+
+      cmp(p, read_8, read_16, indYP);
+
+      pToAdd = 2;
+      cToAdd = 5;
+
+      break;
+
+    case CPX_im:
+      printf("CPX_im\n");
+
+      cpx(p, read_8, read_16, im);
+
+      pToAdd = 2;
+      cToAdd = 2;
+
+      break;
+    case CPX_zpg:
+      printf("CPX_zpg\n");
+
+      cpx(p, read_8, read_16, zpg);
+
+      pToAdd = 2;
+      cToAdd = 3;
+
+      break;
+    case CPX_abs:
+      printf("CPX_abs\n");
+
+      cpx(p, read_8, read_16, absN);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case CPY_im:
+      printf("CPY_im\n");
+
+      cpy(p, read_8, read_16, im);
+
+      pToAdd = 2;
+      cToAdd = 2;
+
+      break;
+    case CPY_zpg:
+      printf("CPY_zpg\n");
+
+      cpy(p, read_8, read_16, zpg);
+
+      pToAdd = 2;
+      cToAdd = 3;
+
+      break;
+    case CPY_abs:
+      printf("CPY_abs\n");
+
+      cpy(p, read_8, read_16, absN);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+
+    case DEC_zpg:
+      printf("DEC_zpg\n");
+
+      dec(p,read_8,read_16,zpg);
+
+      pToAdd = 2;
+      cToAdd = 5;
+
+      break;
+    case DEC_zpgX:
+      printf("DEC_zpgX\n");
+
+      dec(p,read_8,read_16,zpgX);
+
+      pToAdd = 2;
+      cToAdd = 6;
+
+      break;
+    case DEC_abs:
+      printf("DEC_abs\n");
+
+      dec(p,read_8,read_16,absN);
+
+      pToAdd = 3;
+      cToAdd = 6;
+
+      break;
+    case DEC_absX:
+      printf("DEC_absX\n");
+
+      dec(p,read_8,read_16,absX);
+
+      pToAdd = 3;
+      cToAdd = 5;
+
+      break;
+
+    case EOR_im:
+      printf("EOR_im\n");
+
+      eor(p,read_8,read_16,im);
+
+      pToAdd = 2;
+      cToAdd = 2;
+
+      break;
+    case EOR_zpg:
+      printf("EOR_zpg\n");
+
+      eor(p,read_8,read_16,zpg);
+
+      pToAdd = 2;
+      cToAdd = 3;
+
+      break;
+    case EOR_zpgX:
+      printf("EOR_zpgX\n");
+
+      eor(p,read_8,read_16,zpgX);
+
+      pToAdd = 2;
+      cToAdd = 4;
+
+      break;
+    case EOR_abs:
+      printf("EOR_abs\n");
+
+      eor(p,read_8,read_16,absN);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case EOR_absX:
+      printf("EOR_absX\n");
+
+      eor(p,read_8,read_16,absXP);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case EOR_absY:
+      printf("EOR_absY\n");
+
+      eor(p,read_8,read_16,absYP);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case EOR_indX:
+      printf("EOR_indX\n");
+
+      eor(p,read_8,read_16,indX);
+
+      pToAdd = 2;
+      cToAdd = 6;
+
+      break;
+    case EOR_indY:
+      printf("EOR_indY\n");
+
+      eor(p,read_8,read_16,indYP);
+
+      pToAdd = 2;
+      cToAdd = 5;
+
+      break;
+
+    case INC_zpg:
+      printf("INC_zpg\n");
+
+      inc(p,read_8,read_16,zpg);
+
+      pToAdd = 2;
+      cToAdd = 5;
+
+      break;
+    case INC_zpgX:
+      printf("INC_zpgX\n");
+
+      inc(p,read_8,read_16,zpgX);
+
+      pToAdd = 2;
+      cToAdd = 6;
+
+      break;
+    case INC_abs:
+      printf("INC_abs\n");
+
+      inc(p,read_8,read_16,absN);
+
+      pToAdd = 3;
+      cToAdd = 6;
+
+      break;
+    case INC_absX:
+      printf("INC_absX\n");
+
+      inc(p,read_8,read_16,absX);
+
+      pToAdd = 3;
+      cToAdd = 7;
 
       break;
 
@@ -736,6 +1020,61 @@ int doCycle(struct processor* p){
       cToAdd = 3;
 
       break;
+    case LDA_zpgX:
+      printf("LDA_zpgX\n");
+
+      lda(p, read_8, read_16, zpgX);
+
+      pToAdd = 2;
+      cToAdd = 4;
+
+      break;
+    case LDA_abs:
+      printf("LDA_abs\n");
+
+      lda(p, read_8, read_16, absN);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case LDA_absX:
+      printf("LDA_absX\n");
+
+      lda(p, read_8, read_16, absXP);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case LDA_absY:
+      printf("LDA_absY\n");
+
+      lda(p, read_8, read_16, absYP);
+
+      pToAdd = 3;
+      cToAdd = 4;
+
+      break;
+    case LDA_indX:
+      printf("LDA_indX\n");
+
+      lda(p, read_8, read_16, indX);
+
+      pToAdd = 2;
+      cToAdd = 6;
+
+      break;
+    case LDA_indY:
+      printf("LDA_indY\n");
+
+      lda(p, read_8, read_16, indYP);
+
+      pToAdd = 2;
+      cToAdd = 5;
+
+      break;
+
     case LDX_im:
       printf("LDX_im\n");
 
@@ -786,19 +1125,19 @@ reg_8* getVal(struct processor* p, reg_8 read_8, reg_16 read_16, enum addr_mode 
     case absX:
       return p->mem + ((read_16 + p->x) & 0xffff);
     case absXP:
-      if(read_16 + p->x > 0xffff) p->cycles++;
+      if( (read_16 & 0xff00) != ( (read_16 + p->x) & 0xff00) ) p->cycles++;
       return p->mem + ((read_16 + p->x) & 0xffff);
     case absY:
       return p->mem + ((read_16 + p->y) & 0xffff);
     case absYP:
-      if(read_16 + p->y > 0xffff) p->cycles++;
+      if( (read_16 & 0xff00) != ( (read_16 + p->x) & 0xff00) ) p->cycles++;
       return p->mem + ((read_16 + p->y) & 0xffff);
     case indX:
       return p->mem + getFlipped(p->mem + read_8 + p->x, 0, 1);
     case indY:
       return p->mem + getFlipped(p->mem + read_16, 0, 1) + p->y;
     case indYP:
-      if(getFlipped(p->mem + read_16, 0, 1) + p->y > 0xffff) p->cycles++;
+      if( ( (getFlipped(p->mem + read_16, 0, 1) + p->y) & 0xff00) != (getFlipped(p->mem + read_16, 0, 1) & 0xff00) ) p->cycles++;
       return p->mem + getFlipped(p->mem + read_16, 0, 1) + p->y;
     case a:
       return &p->a;
